@@ -1,81 +1,81 @@
 {
   "$schema": "https://json-schema.org/draft/07/schema#",
   "name": "Atmos",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Modular color system for the Air Pollution Dashboard. Every color used anywhere in the workbook is derived from this file. Edit a token here and re-run theme/apply_theme.py to re-skin the entire workbook.",
 
   "color": {
     "surface": {
-      "canvas": "#EEF2F7",
+      "canvas": "#F2F5F9",
       "card": "#FFFFFF",
-      "header": "#132A43"
+      "header": "#17293F"
     },
 
     "ink": {
-      "heading": "#132A43",
-      "body": "#3E5166",
-      "muted": "#6C7F94",
+      "heading": "#16283C",
+      "body": "#42566C",
+      "muted": "#75879D",
       "inverse": "#FFFFFF",
-      "inverseMuted": "#A9BDD4"
+      "inverseMuted": "#B9C8DB"
     },
 
     "line": {
-      "hairline": "#D9E2EC",
-      "headerRule": "#2C5375"
+      "hairline": "#E3EAF2",
+      "headerRule": "#33517A"
     },
 
     "brand": {
-      "primary": "#1B6CA8",
-      "primaryDark": "#14507E"
+      "primary": "#2C7DA0",
+      "primaryDark": "#1F5F80"
     },
 
     "series": {
-      "prior": "#A3B7CB",
-      "current": "#1B6CA8"
+      "prior": "#B3C5D6",
+      "current": "#2C7DA0"
     },
 
     "status": {
-      "good": "#4E9E70",
-      "moderate": "#E3A93D",
-      "bad": "#CF5A5A"
+      "good": "#4E9D77",
+      "moderate": "#E5AF4E",
+      "bad": "#D26A66"
     },
 
     "categorical": {
-      "blue": "#1B6CA8",
-      "amber": "#E3A93D",
-      "green": "#4E9E70",
-      "rose": "#C9605E",
-      "purple": "#7E6DAE",
-      "teal": "#45A0A4",
-      "olive": "#96A054",
-      "brown": "#A9805B"
+      "blue": "#2C7DA0",
+      "amber": "#E5AF4E",
+      "green": "#4E9D77",
+      "rose": "#CE6F6B",
+      "purple": "#8577B5",
+      "teal": "#4BA3A8",
+      "olive": "#9BA75D",
+      "brown": "#AD8B66"
     },
 
     "pollutant": {
-      "pm2_5": "#C9605E",
-      "pm10": "#E3A93D",
-      "co": "#1B6CA8",
-      "no2": "#4E9E70",
-      "o3": "#7E6DAE",
-      "so2": "#45A0A4",
-      "nh3": "#96A054",
-      "no": "#A9805B"
+      "pm2_5": "#CE6F6B",
+      "pm10": "#E5AF4E",
+      "co": "#2C7DA0",
+      "no2": "#4E9D77",
+      "o3": "#8577B5",
+      "so2": "#4BA3A8",
+      "nh3": "#9BA75D",
+      "no": "#AD8B66"
     },
 
     "aqiCategory": {
-      "Low AQI": "#4E9E70",
-      "Moderate AQI": "#E3A93D",
-      "High AQI": "#CF5A5A"
+      "Low AQI": "#4E9D77",
+      "Moderate AQI": "#E5AF4E",
+      "High AQI": "#D26A66"
     },
 
     "exceedanceFlag": {
-      "Normal": "#4E9E70",
-      "High": "#CF5A5A"
+      "Normal": "#4E9D77",
+      "High": "#D26A66"
     },
 
     "year": {
-      "2021": "#A3B7CB",
-      "2022": "#1B6CA8"
+      "2021": "#B3C5D6",
+      "2022": "#2C7DA0"
     }
   },
 

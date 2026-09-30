@@ -68,9 +68,10 @@ WS_CACHES = {
                            "non-cell-size-w='48' type-h='scalable' type-w='cell' />"),
 }
 
-MARGIN = 800          # page side margin
-GUTTER = 800          # gutter between cards
+MARGIN = 1000         # page side margin
+GUTTER = 1000         # gutter between cards
 CONTENT_W = 100000 - 2 * MARGIN
+STRIP_H = 550         # accent strip height on top of KPI cards
 
 def row(n: int, y: int, h: int, gap: int = GUTTER):
     """Evenly spaced x-positions for n cards across the content width."""
@@ -97,13 +98,13 @@ DASH_NATIONWIDE = {
     ],
     "kpi_row": (10600, 15300),
     "main": {
-        "map": (800, 27000, 35000, 57000),
-        "monthly_y": (36600, 27000, 62600, 28400),
-        "top5": (36600, 56400, 62600, 27600),
+        "map": (1000, 27000, 34800, 57000),
+        "monthly_y": (36800, 27000, 62200, 28400),
+        "top5": (36800, 56400, 62200, 27600),
     },
     "footer": {
-        "records": (800, 85100, 30000, 14100),
-        "note": (31600, 85100, 67600, 14100),
+        "records": (1000, 85100, 29800, 14100),
+        "note": (31800, 85100, 67200, 14100),
     },
     "button_kind": "drilldown",
 }
@@ -118,12 +119,12 @@ DASH_CITY = {
         "button": (81000, 2350, 17000, 4800),
     },
     "accent": (0, 9500, 100000, 650),
-    "control": (800, 10600, 98400, 9600),
+    "control": (1000, 10600, 98000, 9600),
     "control_children": {
-        "label": (2600, 12200, 42000, 6200),
-        "city_filter": (47600, 12200, 15600, 6200),
-        "pollutant_param": (64800, 12200, 15600, 6200),
-        "legend": (82200, 12200, 15200, 6200),
+        "label": (2800, 12200, 42000, 6200),
+        "city_filter": (47400, 12200, 15400, 6200),
+        "pollutant_param": (64800, 12200, 15400, 6200),
+        "legend": (82200, 12200, 15400, 6200),
     },
     "kpis": [
         ("City Selector", "SELECTED CITY", "< Delhi >"),
@@ -133,11 +134,12 @@ DASH_CITY = {
     ],
     "kpi_row": (21400, 15300),
     "main": {
-        "avg_conc": (800, 37800, 29000, 45400),
-        "monthly_avg": (29800, 37800, 68600, 26000),
-        "pct_days": (29800, 64800, 68600, 18400),
+        "avg_conc": (1000, 37800, 28800, 23400),
+        "city_map": (1000, 62200, 28800, 21000),
+        "monthly_avg": (30800, 37800, 68200, 26000),
+        "pct_days": (30800, 64800, 68200, 18400),
     },
-    "footer": {"note": (800, 84300, 98400, 14900)},
+    "footer": {"note": (1000, 84300, 98000, 14900)},
     "button_kind": "home",
 }
 
@@ -281,6 +283,12 @@ def build_dashboard_1() -> str:
                 cache=WS_CACHES["Top 5 Pollutants"], style=card()),
     ]
     f = d["footer"]
+    # slim brand accent rules across the top of every stat card
+    strips = [simple_zone(60 + k, (x, y, w, STRIP_H), hx(C["brand"]["primary"]))
+              for k, (x, y, w, h) in enumerate(row(len(d["kpis"]), *d["kpi_row"]))]
+    strips.append(simple_zone(66, (f["records"][0], f["records"][1],
+                                   f["records"][2], STRIP_H),
+                              hx(C["brand"]["primary"])))
     footer_zones = [
         ws_zone(40, "Total Records Monitored", *f["records"],
                 cache=WS_CACHES["Total Records Monitored"], style=card()),
@@ -292,7 +300,8 @@ def build_dashboard_1() -> str:
                   style=card()),
     ]
 
-    children = "\n        ".join([header, accent] + kpi_zones + main_zones + footer_zones)
+    children = "\n        ".join([header, accent] + kpi_zones + main_zones
+                                + footer_zones + strips)
     deps = f"""      <datasources>
         <datasource caption='air_pollution_data (air_pollution_data)' name='{DS}' />
       </datasources>
@@ -347,20 +356,24 @@ def build_dashboard_2() -> str:
     m = d["main"]
     main_zones = [
         ws_zone(40, "Avg Conc Year", *m["avg_conc"], cache=WS_CACHES["Avg Conc Year"], style=card()),
+        ws_zone(43, "City Map", *m["city_map"], cache=WS_CACHES["Map"], style=card()),
         ws_zone(41, "Monthly Avg Concentration", *m["monthly_avg"],
                 cache=WS_CACHES["Monthly Avg Concentration"], style=card()),
         ws_zone(42, "Percentage of Days", *m["pct_days"],
                 cache=WS_CACHES["Percentage of Days"], style=card()),
     ]
+    strips = [simple_zone(60 + k, (x, y, w, STRIP_H), hx(C["brand"]["primary"]))
+              for k, (x, y, w, h) in enumerate(row(len(d["kpis"]), *d["kpi_row"]))]
     footer = text_zone(50, *d["footer"]["note"],
                        run("HOW TO READ", 9, hx(C["ink"]["muted"]), bold=True, font=T["familyBold"])
-                       + run("&#10;" + esc("Left \u2014 annual average concentration of the selected pollutant (2021 vs 2022) with the NAAQS annual limit as the dashed reference line. "
-                                           "Right \u2014 monthly concentration trend by year, and the share of days above the NAAQS 24-hour limit for the selected city. "
+                       + run("&#10;" + esc("Left \u2014 annual average concentration of the selected pollutant (2021 vs 2022) against the NAAQS annual limit, plus a locator map of the selected city. "
+                                           "Right \u2014 monthly concentration trend by year, and the share of days above the NAAQS 24-hour limit. "
                                            "Source: CPCB ambient air quality monitoring, 26 Indian cities, 2021\u20132022."),
                              T["footnote"], hx(C["ink"]["body"])),
                        style=card())
 
-    children = "\n        ".join([header, accent, control] + kpi_zones + main_zones + [footer])
+    children = "\n        ".join([header, accent, control] + kpi_zones + main_zones
+                                + [footer] + strips)
     deps = f"""      <datasources>
         <datasource name='Parameters' />
         <datasource caption='air_pollution_data (air_pollution_data)' name='{DS}' />
@@ -444,6 +457,7 @@ KPI_SHEETS = {
 }
 CHART_TITLES = {
     "Map": "Average AQI by City",
+    "City Map": "Selected City Location",
     "Monthly Y Variation": "Monthly AQI Trend by Year",
     "Top 5 Pollutants": "Top 5 Air Pollutants by Avg Concentration",
 }
@@ -509,7 +523,7 @@ def restyle_worksheet(xml: str, name: str, title: str | None, kind: str,
     # 3. cell-level value formats (numeric KPIs) ------------------------------
     if kind == "kpi":
         blk = blk.replace("value='Yu Gothic UI Semibold'", f"value='{T['familyBold']}'")  # no-op if themed
-        blk, _ = sub_count(r"(<format attr='color' field='[^']+' value=')#(?:000000|132a43)(')",
+        blk, _ = sub_count(r"(<format attr='color' field='[^']+' value=')#[0-9a-fA-F]{6}(')",
                            lambda m: m.group(1) + hx(C["ink"]["heading"]) + m.group(2), blk,
                            label=f"{name}:cell-color")
         if size:
@@ -526,9 +540,11 @@ def restyle_worksheet(xml: str, name: str, title: str | None, kind: str,
         blk, _ = sub_count(r"(<style-rule element='worksheet'>.*?)</style-rule>",
                            lambda m: _fix_worksheet_rule(m.group(0), T["family"], hx(C["ink"]["body"]), None),
                            blk, label=f"{name}:ws-rule")
-        # muted dashed reference lines
-        blk = blk.replace("<format attr='stroke-color' id='refline0' value='#000000' />",
-                          f"<format attr='stroke-color' id='refline0' value='{hx(C['ink']['muted'])}' />")
+        # muted dashed reference lines (match any current hex -> re-theme safe)
+        blk, _ = sub_count(
+            r"(<format attr='stroke-color' id='refline0' value=')#[0-9a-fA-F]{6}(')",
+            lambda m: (m.group(1) + hx(C["ink"]["muted"]) + m.group(2)), blk,
+            label=f"{name}:refline")
     return xml[:i] + blk + xml[j:]
 
 def _fix_worksheet_rule(rule: str, family: str, color: str, size: int | None) -> str:
@@ -556,48 +572,119 @@ def year_encoding() -> str:
     return (f"<encoding attr='color' field='[yr:date:ok]' type='palette'>\n            "
             + maps + "\n          </encoding>")
 
+CITY_MAP_UUID = "{9C4E2A71-8F3B-4D62-B5E8-7A1C93D40F52}"
+CITY_MAP_WIN_UUID = "{4D8F1B26-A97E-4C05-8E2B-6F3A71C92D48}"
+
+def ensure_city_map(xml: str) -> str:
+    """Clone the Map worksheet as 'City Map' and wire it to the City Drilldown's
+    city filter (filter-group 3), so the drilldown gets a locator map that
+    zooms to the selected city. Runs once; re-runs are no-ops."""
+    if "<worksheet name='City Map'>" in xml:
+        return xml
+
+    i, j = sheet_span(xml, "Map")
+    blk = xml[i:j]
+
+    # rename + fresh ids
+    blk = blk.replace("<worksheet name='Map'>", "<worksheet name='City Map'>", 1)
+    blk, _ = sub_count(r"<repository-location[^>]*/>",
+                       "<repository-location id='CityMap' "
+                       "path='/workbooks/Air_Pollution_Dashboard' revision='' />",
+                       blk, expect=1, label="citymap-repoloc")
+    blk, _ = sub_count(r"<simple-id uuid='[^']+' />",
+                       f"<simple-id uuid='{CITY_MAP_UUID}' />",
+                       blk, expect=1, label="citymap-uuid")
+
+    # drop the year filter (group 5): the locator map shows the full period
+    blk, _ = sub_count(
+        r"<filter class='categorical' column='\[federated\.0r5ypuv12cy9kq13t07co0hzn2wb\]\.\[yr:date:ok\]'[^>]*>.*?</filter>\s*",
+        "", blk, expect=1, label="citymap-drop-year")
+    blk, _ = sub_count(
+        r"<slices>\s*<column>\[federated\.0r5ypuv12cy9kq13t07co0hzn2wb\]\.\[yr:date:ok\]</column>\s*</slices>",
+        "", blk, expect=1, label="citymap-drop-year-slice")
+
+    # add the city filter (same group 3 the drilldown's card targets)
+    city_filter = ("<filter class='categorical' "
+                   "column='[federated.0r5ypuv12cy9kq13t07co0hzn2wb].[none:city:nk]' "
+                   "filter-group='3'>\n"
+                   "            <groupfilter function='level-members' level='[none:city:nk]' "
+                   "user:ui-enumeration='all' user:ui-marker='enumerate' />\n"
+                   "          </filter>\n          ")
+    blk, _ = sub_count(r"(</datasource-dependencies>\s*\n\s*)",
+                       lambda m: m.group(1) + city_filter, blk, expect=1,
+                       label="citymap-add-filter")
+    blk, _ = sub_count(r"(<aggregation value='true' />)",
+                       lambda m: ("<slices>\n            <column>[federated.0r5ypuv12cy9kq13t07co0hzn2wb]"
+                                  ".[none:city:nk]</column>\n          </slices>\n          "
+                                  + m.group(1)),
+                       blk, expect=1, label="citymap-add-slice")
+    # append the clone AFTER the original Map worksheet (original stays intact)
+    end = j + len("</worksheet>")
+    xml = xml[:end] + "\r\n    " + blk + "</worksheet>" + xml[end:]
+
+    # worksheet window (clone Map's window with a fresh uuid)
+    wi = xml.find("<window class='worksheet' name='Map'>")
+    wj = xml.find("</window>", wi) + len("</window>")
+    win = xml[wi:wj]
+    win = win.replace("<window class='worksheet' name='Map'>",
+                      "<window class='worksheet' name='City Map'>", 1)
+    win, _ = sub_count(r"<simple-id uuid='[^']+' />",
+                       f"<simple-id uuid='{CITY_MAP_WIN_UUID}' />", win,
+                       expect=1, label="citymap-win-uuid")
+    xml = xml[:wj] + "\r\n    " + win + xml[wj:]
+
+    # viewpoint on the City Drilldown dashboard window
+    vi = xml.find("<viewpoint name='City Selector'>")
+    vj = xml.find("</viewpoint>", vi) + len("</viewpoint>")
+    vp = ("\r\n        <viewpoint name='City Map'>\r\n"
+          "          <zoom type='entire-view' />\r\n        </viewpoint>")
+    xml = xml[:vj] + vp + xml[vj:]
+    return xml
+
 def apply_theme_to_twb(xml: str) -> str:
     report = []
 
     # ---- worksheets ----------------------------------------------------------
     for name, (title, size) in KPI_SHEETS.items():
         xml = restyle_worksheet(xml, name, title, "kpi", size)
-    for name in ("Map", "Monthly Y Variation", "Top 5 Pollutants",
+    xml = ensure_city_map(xml)
+    for name in ("Map", "City Map", "Monthly Y Variation", "Top 5 Pollutants",
                  "Avg Conc Year", "Monthly Avg Concentration", "Percentage of Days"):
         xml = restyle_worksheet(xml, name, CHART_TITLES.get(name), "chart")
     report.append("worksheets: titles, surfaces, ink and fonts restyled")
 
     # ---- mark colors (panes) -------------------------------------------------
     amber = hx(C['categorical']['amber']); primary = hx(C['brand']['primary'])
-    xml, _ = sub_count(r"<format attr='mark-color' value='#4e79a7' />",
-                       f"<format attr='mark-color' value='{amber}' />",
-                       xml, expect=1, label="monthlyY-delta-color",
-                       already=f"<format attr='mark-color' value='{amber}' />")
-    xml, _ = sub_count(r"<format attr='mark-color' value='#f28e2b' />",
-                       f"<format attr='mark-color' value='{primary}' />",
-                       xml, expect=1, label="monthlyY-aqi-color",
-                       already=f"<format attr='mark-color' value='{primary}' />")
-
-    # Avg Conc Year: single gray bars -> colored by year + add color encoding
-    i, j = sheet_span(xml, "Avg Conc Year")
-    blk = xml[i:j]
-    blk, _ = sub_count(r"<format attr='mark-color' value='#898989' />",
-                       year_encoding(), blk, expect=1, label="avgconc-year-encoding",
-                       already=year_encoding())
-    def _add_color(m):
-        return m.group(1) + f"<color column='{YEAR}' />\n              " + m.group(2)
-    blk, _ = sub_count(r"(<encodings>\s*)(<text column=')", _add_color,
-                       blk, expect=1, label="avgconc-color-pill",
-                       already=f"<color column='{YEAR}' />")
+    i, j = sheet_span(xml, "Monthly Y Variation")
+    _n = {"k": 0}
+    def _my_mark(m):
+        color = amber if _n["k"] == 0 else primary   # pane 1 = YoY delta, pane 2 = AQI
+        _n["k"] += 1
+        return f"<format attr='mark-color' value='{color}' />"
+    blk, _ = sub_count(r"<format attr='mark-color' value='#[0-9a-fA-F]{6}' />",
+                       _my_mark, xml[i:j], expect=2, label="monthlyY-mark-colors")
     xml = xml[:i] + blk + xml[j:]
 
-    # Monthly Avg Concentration: gray mark color -> year palette
-    i, j = sheet_span(xml, "Monthly Avg Concentration")
-    blk = xml[i:j]
-    blk, _ = sub_count(r"<format attr='mark-color' value='#606b76' />",
-                       year_encoding(), blk, expect=1, label="monthlyavg-year-encoding",
-                       already=year_encoding())
-    xml = xml[:i] + blk + xml[j:]
+    # year color encings: convert a raw mark-color, or refresh an existing one
+    def apply_year_colors(xml, sheet, add_pill, label):
+        i, j = sheet_span(xml, sheet)
+        blk = xml[i:j]
+        if re.search(r"<format attr='mark-color' value='#[0-9a-fA-F]{6}' />", blk):
+            blk, _ = sub_count(r"<format attr='mark-color' value='#[0-9a-fA-F]{6}' />",
+                               year_encoding(), blk, expect=1, label=label)
+        else:
+            blk, _ = sub_count(
+                r"<encoding attr='color' field='\[yr:date:ok\]' type='palette'>.*?</encoding>",
+                year_encoding(), blk, expect=1, label=f"{label}-refresh")
+        if add_pill and f"<color column='{YEAR}' />" not in blk:
+            def _add_color(m):
+                return m.group(1) + f"<color column='{YEAR}' />\n              " + m.group(2)
+            blk, _ = sub_count(r"(<encodings>\s*)(<text column=')", _add_color,
+                               blk, expect=1, label=f"{label}-pill")
+        return xml[:i] + blk + xml[j:]
+
+    xml = apply_year_colors(xml, "Avg Conc Year", True, "avgconc-year")
+    xml = apply_year_colors(xml, "Monthly Avg Concentration", False, "monthlyavg-year")
 
     # ---- bucket -> color maps (pin every discrete color to the palette) ------
     def replace_encoding(xml, field, mapping, expect):
@@ -615,14 +702,13 @@ def apply_theme_to_twb(xml: str) -> str:
                   "years pinned to palette tokens")
 
     # ---- map style -----------------------------------------------------------
-    xml, _ = sub_count(r"<format attr='map-style' value='dark' />",
-                       "<format attr='map-style' value='normal' />", xml,
-                       expect=1, label="map-style",
-                       already="<format attr='map-style' value='normal' />")
-    xml, _ = sub_count(r"<format attr='washout' value='0' />",
-                       "<format attr='washout' value='30' />", xml,
-                       expect=1, label="map-washout",
-                       already="<format attr='washout' value='30' />")
+    # map styles live inside the Map worksheet (and its City Map clone)
+    xml, _ = sub_count(r"(<format attr='map-style' value=')\w+(')",
+                       lambda m: m.group(1) + "normal" + m.group(2), xml,
+                       expect=2, label="map-style")
+    xml, _ = sub_count(r"(<format attr='washout' value=')\d+(')",
+                       lambda m: m.group(1) + "45" + m.group(2), xml,
+                       expect=2, label="map-washout")
     report.append("map: light basemap with 30% washout")
 
     # ---- City Selector sheet extras -----------------------------------------
@@ -631,7 +717,7 @@ def apply_theme_to_twb(xml: str) -> str:
     if "fontname='Yu Gothic UI Semibold'" in blk:
         blk = blk.replace("fontname='Yu Gothic UI Semibold'", f"fontname='{T['familyBold']}'")
     # customized "<City>" label: bold ink numerals
-    blk, _ = sub_count(r"<run bold='true'( fontcolor='[0-9a-f]{6}')? fontname='Tableau Bold' fontsize='20'>",
+    blk, _ = sub_count(r"<run bold='true'( fontcolor='#[0-9a-fA-F]{6}')? fontname='Tableau Bold' fontsize='20'>",
                        f"<run bold='true' fontcolor='{hx(C['ink']['heading'])}' "
                        f"fontname='{T['familyBold']}' fontsize='20'>",
                        blk, label="cityselector-label")
@@ -643,8 +729,26 @@ def apply_theme_to_twb(xml: str) -> str:
                        blk, expect=1, label="cityselector-qf-title")
     xml = xml[:i] + blk + xml[j:]
 
+    # ---- Measure Names maps (leftover measure palettes) -> categorical cycle --
+    mm = re.search(r"<encoding attr='color' field='\[:Measure Names\]' type='palette'>(.*?)</encoding>",
+                   xml, re.S)
+    if mm:
+        buckets = [b.strip() for b in re.findall(r"<bucket>([^<]+)</bucket>", mm.group(1))]
+        buckets = [b[len("&quot;"):-len("&quot;")] if b.startswith("&quot;") else b
+                   for b in buckets]
+        cycle = [C["categorical"][k] for k in ("blue", "amber", "green", "rose",
+                                               "purple", "teal", "olive", "brown")]
+        mapping = {b: cycle[k % len(cycle)] for k, b in enumerate(buckets)}
+        xml, _ = sub_count(
+            r"<encoding attr='color' field='\[:Measure Names\]' type='palette'>.*?</encoding>",
+            bucket_encoding("[:Measure Names]", mapping), xml, expect=1,
+            label="measure-names")
+
     # ---- tooltip labels + global legacy-hex sweep ----------------------------
     xml = xml.replace("fontcolor='#787878'", f"fontcolor='{hx(C['ink']['muted'])}'")
+    xml, _ = sub_count(r"(<run fontcolor=')#[0-9a-fA-F]{6}('>[^<]*:[^<]*</run>)",
+                       lambda m: (m.group(1) + hx(C["ink"]["muted"]) + m.group(2)),
+                       xml, label="tooltip-label-runs")
     legacy = {
         "#4e79a7": hx(C["categorical"]["blue"]),   "#f28e2b": hx(C["categorical"]["amber"]),
         "#76b7b2": hx(C["categorical"]["teal"]),   "#9c755f": hx(C["categorical"]["brown"]),
@@ -768,6 +872,8 @@ def render_preview(spec: dict, path: Path, buttons: dict):
         vy = y * sy + h * sy / 2 + 14
         for k, line in enumerate(value.split("\n")):
             d.text((cx, vy + k * 30), line, font=F(big, True), fill=t(("ink", "heading")), anchor="mm")
+        d.rectangle([x * sx, y * sy, x * sx + w * sx, y * sy + 5],
+                    fill=t(("brand", "primary")))
 
     if spec["name"] == "Nationwide Overview":
         render_nationwide(img, d, spec, t, F, rect, card, buttons)
@@ -800,28 +906,19 @@ def render_nationwide(img, d, spec, t, F, rect, card, buttons):
     # Map ---------------------------------------------------------------------------
     z = m["map"]; rect(z, **card)
     _title(d, z, "Average AQI by City", t, F)
-    _caption(d, z, "bubble size = avg AQI \u00b7 color = category", t, F)
     x, y, w, h = z
-    mx, my, mw, mh = x * sx_ + 20, y * sy_ + 66, w * sx_ - 40, h * sy_ - 96
-    d.rectangle([mx, my, mx + mw, my + mh], fill="#E9EEF3", outline=t(("line", "hairline")))
-    india = [(0.44,0.04),(0.38,0.10),(0.33,0.20),(0.30,0.34),(0.24,0.42),(0.22,0.55),
-             (0.28,0.68),(0.33,0.80),(0.36,0.93),(0.44,0.97),(0.50,0.90),(0.55,0.78),
-             (0.62,0.66),(0.70,0.55),(0.78,0.47),(0.88,0.42),(0.96,0.34),(0.88,0.30),
-             (0.76,0.30),(0.62,0.26),(0.52,0.16)]
-    pts = [(mx + a * mw, my + b * mh) for a, b in india]
-    d.polygon(pts, fill="#F3F6F9", outline="#C7D2DD")
-    cities = [  # (x, y, r, color)
-        (0.42,0.22,11,"bad"),(0.40,0.26,10,"bad"),(0.33,0.20,8,"moderate"),(0.36,0.30,9,"moderate"),
-        (0.52,0.32,10,"bad"),(0.60,0.36,10,"bad"),(0.70,0.44,9,"bad"),(0.58,0.42,8,"moderate"),
-        (0.64,0.40,8,"moderate"),(0.56,0.45,8,"moderate"),(0.24,0.46,9,"moderate"),(0.26,0.56,8,"moderate"),
-        (0.37,0.47,8,"moderate"),(0.44,0.66,8,"moderate"),(0.43,0.79,7,"good"),(0.50,0.83,7,"good"),
-        (0.37,0.87,6,"good"),(0.37,0.92,5,"good"),(0.55,0.73,7,"good"),(0.43,0.76,6,"good"),
-        (0.85,0.37,6,"good"),(0.80,0.41,6,"good"),(0.89,0.43,5,"good"),(0.50,0.77,6,"good"),
-        (0.37,0.84,6,"good"),(0.60,0.34,7,"moderate")]
-    for a, b, r, c in cities:
-        cx, cy = mx + a * mw, my + b * mh
-        col = t(("status", c))
-        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col, outline="#FFFFFF", width=2)
+    mx, my = x * sx_ + 20, y * sy_ + 62
+    mw, mh = w * sx_ - 40, h * sy_ - 106
+    draw_india(d, (mx, my, mw, mh), t, F)
+    # legend chips under the map
+    lx = mx
+    ly = my + mh + 10
+    for cat, lab in (("good", "Low"), ("moderate", "Moderate"), ("bad", "High")):
+        d.ellipse([lx, ly - 6, lx + 12, ly + 6], fill=t(("status", cat)))
+        d.text((lx + 18, ly), lab, font=F(11), fill=t(("ink", "muted")), anchor="lm")
+        lx += 18 + d.textlength(lab, font=F(11)) + 18
+    d.text((mx + mw, ly), "bubble size = avg AQI", font=F(11),
+           fill=t(("ink", "muted")), anchor="rm")
 
     # Monthly Y Variation ------------------------------------------------------------
     z = m["monthly_y"]; rect(z, **card)
@@ -877,6 +974,7 @@ def render_nationwide(img, d, spec, t, F, rect, card, buttons):
     # footer ----------------------------------------------------------------------------
     z = spec["footer"]["records"]; rect(z, **card)
     x, y, w, h = z
+    d.rectangle([x * sx_, y * sy_, x * sx_ + w * sx_, y * sy_ + 5], fill=t(("brand", "primary")))
     d.text((x * sx_ + 16, y * sy_ + 18), "RECORDS MONITORED", font=F(13),
            fill=t(("ink", "muted")))
     d.text((x * sx_ + 16, y * sy_ + h * sy_ / 2 + 6), "18,980", font=F(34, True),
@@ -939,6 +1037,28 @@ def render_city(img, d, spec, t, F, rect, card, buttons):
         d.line([dash, ref, dash + 6, ref], fill=t(("ink", "muted")), width=2)
     d.text((bx + bw + 24, ref), "NAAQS\nannual limit", font=F(10), fill=t(("ink", "muted")), anchor="lm")
 
+    # City Map (locator) ------------------------------------------------------------------------
+    z = m["city_map"]; rect(z, **card)
+    _title(d, z, "Selected City Location", t, F)
+    x, y, w, h = z
+    mx, my = x * sx_ + 18, y * sy_ + 56
+    mw, mh = w * sx_ - 36, h * sy_ - 96
+    d.rectangle([mx, my, mx + mw, my + mh], fill=MAP_SEA)
+    # zoomed-in feel: soft graticule
+    for gx in range(1, 4):
+        d.line([mx + mw * gx / 4, my, mx + mw * gx / 4, my + mh], fill="#D8E3ED", width=1)
+    for gy in range(1, 3):
+        d.line([mx, my + mh * gy / 3, mx + mw, my + mh * gy / 3], fill="#D8E3ED", width=1)
+    cx, cy = mx + mw / 2, my + mh / 2
+    col = t(("status", "bad"))
+    d.ellipse([cx - 15, cy - 15, cx + 15, cy + 15], fill=col, outline="#FFFFFF", width=3)
+    d.ellipse([cx - 26, cy - 26, cx + 26, cy + 26], outline=col, width=2)
+    d.text((cx, my + mh - 16), "Delhi \u00b7 avg AQI 4.3", font=F(12, True),
+           fill=t(("ink", "heading")), anchor="mm")
+    # compass
+    d.ellipse([mx + mw - 26, my + 10, mx + mw - 8, my + 28], outline=t(("ink", "muted")), width=1)
+    d.text((mx + mw - 17, my + 13), "N", font=F(10), fill=t(("ink", "muted")), anchor="ma")
+
     # Monthly Avg Concentration ---------------------------------------------------------------
     z = m["monthly_avg"]; rect(z, **card)
     _title(d, z, "Monthly Avg Concentration Trend \u2014 PM2.5", t, F)
@@ -988,9 +1108,67 @@ def render_city(img, d, spec, t, F, rect, card, buttons):
     # footer --------------------------------------------------------------------------------------
     z = spec["footer"]["note"]; rect(z, **card)
     _title(d, z, "HOW TO READ", t, F)
-    _caption(d, z, "Left \u2014 annual average concentration of the selected pollutant (2021 vs 2022) with the NAAQS annual limit as the dashed reference line.", t, F, dy=32)
+    _caption(d, z, "Left \u2014 annual average concentration of the selected pollutant (2021 vs 2022) against the NAAQS annual limit, plus a locator map of the selected city.", t, F, dy=32)
     _caption(d, z, "Right \u2014 monthly concentration trend by year, and the share of days above the NAAQS 24-hour limit for the selected city.", t, F, dy=52)
     _caption(d, z, "Source: CPCB ambient air quality monitoring, 26 Indian cities, 2021\u20132022.", t, F, dy=72)
+
+# --- geography helpers for previews (approximate India outline, lon/lat) ---
+INDIA_OUTLINE = [
+    (74.6, 35.1), (75.9, 34.6), (77.0, 33.7), (78.2, 32.6), (78.9, 31.4),
+    (79.5, 30.3), (80.2, 29.9), (81.0, 30.2), (82.1, 29.6), (83.6, 29.2),
+    (85.0, 27.7), (86.9, 27.0), (88.1, 27.5), (88.8, 26.4), (89.7, 26.2),
+    (91.5, 26.8), (92.5, 27.5), (94.0, 28.3), (95.5, 29.0), (96.8, 29.2),
+    (97.0, 28.0), (95.3, 26.4), (94.6, 25.2), (94.3, 23.9), (93.3, 22.9),
+    (92.6, 22.0), (92.3, 24.4), (91.3, 23.6), (90.0, 25.2), (89.8, 26.0),
+    (88.4, 26.4), (88.1, 25.0), (88.3, 23.8), (89.0, 22.4), (88.3, 21.7),
+    (87.1, 21.6), (86.4, 20.1), (85.1, 19.6), (83.5, 18.2), (82.2, 17.0),
+    (80.9, 16.0), (80.2, 14.0), (80.1, 12.5), (79.8, 10.3), (78.9, 9.2),
+    (77.5, 8.1), (76.4, 9.5), (75.7, 11.4), (74.8, 13.4), (74.0, 15.4),
+    (73.2, 17.2), (72.8, 19.0), (72.6, 20.6), (72.9, 21.5), (72.2, 21.9),
+    (71.8, 21.0), (71.0, 20.7), (70.0, 21.5), (69.0, 22.4), (68.2, 23.6),
+    (68.7, 24.3), (70.0, 25.0), (70.8, 25.7), (70.6, 27.0), (71.9, 27.9),
+    (72.9, 29.0), (73.9, 30.3), (74.3, 31.7), (74.0, 33.3), (74.6, 34.7),
+]
+GEO_BOUNDS = (67.5, 7.5, 97.5, 36.5)   # lon0, lat0, lon1, lat1
+
+CITY_BUBBLES = [   # name, lon, lat, radius, status
+    ("Delhi", 77.2, 28.6, 13, "bad"), ("Gurugram", 77.0, 28.4, 12, "bad"),
+    ("Lucknow", 80.9, 26.8, 12, "bad"), ("Patna", 85.1, 25.6, 12, "bad"),
+    ("Kolkata", 88.4, 22.6, 12, "bad"), ("Amritsar", 74.9, 31.6, 9, "moderate"),
+    ("Chandigarh", 76.8, 30.6, 9, "moderate"), ("Jaipur", 75.8, 26.9, 10, "moderate"),
+    ("Ahmedabad", 72.6, 23.0, 10, "moderate"), ("Mumbai", 72.9, 19.1, 10, "moderate"),
+    ("Bhopal", 77.4, 23.3, 9, "moderate"), ("Brajrajnagar", 83.9, 21.8, 8, "moderate"),
+    ("Jorapokhar", 86.4, 23.9, 8, "moderate"), ("Talcher", 85.2, 21.0, 8, "moderate"),
+    ("Hyderabad", 78.5, 17.4, 9, "moderate"), ("Amaravati", 80.5, 16.5, 7, "moderate"),
+    ("Visakhapatnam", 83.2, 17.7, 7, "good"), ("Chennai", 80.3, 13.1, 8, "moderate"),
+    ("Bengaluru", 77.6, 13.0, 8, "good"), ("Coimbatore", 77.0, 11.0, 6, "good"),
+    ("Kochi", 76.3, 10.1, 6, "good"), ("Thiruvananthapuram", 76.9, 8.5, 5, "good"),
+    ("Guwahati", 91.7, 26.1, 7, "good"), ("Shillong", 91.9, 25.5, 6, "good"),
+    ("Aizawl", 92.7, 23.7, 5, "good"),
+]
+MAP_LAND = "#F6F8FA"; MAP_SEA = "#E8F0F7"; MAP_COAST = "#C5D3E0"
+MAP_LABELS = {"Delhi", "Mumbai", "Kolkata", "Chennai", "Bengaluru"}
+
+def geo_to_px(lon, lat, box):
+    x0, y0, w, h = box
+    lon0, lat0, lon1, lat1 = GEO_BOUNDS
+    return (x0 + (lon - lon0) / (lon1 - lon0) * w,
+            y0 + (lat1 - lat) / (lat1 - lat0) * h)
+
+def draw_india(d, box, t, F):
+    """India map with city bubbles; box = (x, y, w, h) in canvas px."""
+    x0, y0, w, h = box
+    d.rectangle([x0, y0, x0 + w, y0 + h], fill=MAP_SEA)
+    pts = [geo_to_px(lon, lat, box) for lon, lat in INDIA_OUTLINE]
+    d.polygon(pts, fill=MAP_LAND, outline=MAP_COAST)
+    for name, lon, lat, r, cat in CITY_BUBBLES:
+        cx, cy = geo_to_px(lon, lat, box)
+        col = t(("status", cat))
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col,
+                  outline="#FFFFFF", width=2)
+        if name in MAP_LABELS:
+            d.text((cx + r + 4, cy - 6), name, font=F(10),
+                   fill=t(("ink", "body")), anchor="lm")
 
 # module-level scale factors used by the render helpers
 sx_, sy_ = 1600 / 100000, 900 / 100000

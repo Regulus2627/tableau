@@ -34,19 +34,19 @@ you can change a token and re-run at any time to re-skin everything.
 
 | Group | Token | Hex | Applied to |
 |---|---|---|---|
-| **Surface** | `canvas` | `#EEF2F7` | Dashboard background |
+| **Surface** | `canvas` | `#F2F5F9` | Dashboard background |
 | | `card` | `#FFFFFF` | Every worksheet/text card + worksheet table & title backgrounds |
-| | `header` | `#132A43` | Dashboard header band |
-| **Ink** | `heading` | `#132A43` | Chart titles, KPI values, axis text emphasis |
-| | `body` | `#3E5166` | Worksheet body text, footnotes |
-| | `muted` | `#6C7F94` | KPI labels, captions, reference lines, tooltip labels |
-| | `inverse` / `inverseMuted` | `#FFFFFF` / `#A9BDD4` | Title / subtitle on the navy header |
-| **Line** | `hairline` | `#D9E2EC` | Card borders |
-| | `headerRule` | `#2C5375` | Navigation-button border on the header |
-| **Brand** | `primary` | `#1B6CA8` | Accent strip, Avg-AQI marks, 2022 series, parameter highlight in dynamic titles |
-| | `primaryDark` | `#14507E` | Reserve (hover / emphasis) |
-| **Series** | `prior` / `current` | `#A3B7CB` / `#1B6CA8` | Year comparison — **2021 vs 2022** everywhere |
-| **Status** | `good` / `moderate` / `bad` | `#4E9E70` / `#E3A93D` / `#CF5A5A` | AQI categories (map bubbles), NAAQS exceedance flags |
+| | `header` | `#17293F` | Dashboard header band |
+| **Ink** | `heading` | `#16283C` | Chart titles, KPI values, axis text emphasis |
+| | `body` | `#42566C` | Worksheet body text, footnotes |
+| | `muted` | `#75879D` | KPI labels, captions, reference lines, tooltip labels |
+| | `inverse` / `inverseMuted` | `#FFFFFF` / `#B9C8DB` | Title / subtitle on the navy header |
+| **Line** | `hairline` | `#E3EAF2` | Card borders |
+| | `headerRule` | `#33517A` | Navigation-button border on the header |
+| **Brand** | `primary` | `#2C7DA0` | Accent strip + KPI card accent rules, Avg-AQI marks, 2022 series, parameter highlight in dynamic titles |
+| | `primaryDark` | `#1F5F80` | Reserve (hover / emphasis) |
+| **Series** | `prior` / `current` | `#B3C5D6` / `#2C7DA0` | Year comparison — **2021 vs 2022** everywhere |
+| **Status** | `good` / `moderate` / `bad` | `#4E9D77` / `#E5AF4E` / `#D26A66` | AQI categories (map bubbles), NAAQS exceedance flags |
 | **Categorical** | 8 tokens | see palette | Distinct series (blue, amber, green, rose, purple, teal, olive, brown) |
 | **Pollutant** | 8 tokens | see palette | Fixed color per pollutant — pm2.5 rose, pm10 amber, co blue, no2 green, o3 purple, so2 teal, nh3 olive, no brown |
 
@@ -84,18 +84,22 @@ with an 0.8 % margin and gutters:
 1. **Header band** — title + back-to-overview button
 2. **Control strip** — city filter, pollutant parameter, year legend
 3. **KPI band** — 4 cards: Selected City · Avg AQI · Peak Month · % Unhealthy Days
-4. **Chart grid** — annual concentration vs NAAQS limit · monthly trend by year · % days above 24-h limit
+4. **Chart grid** — annual concentration vs NAAQS limit · **locator map of the selected city** (new `City Map` worksheet, wired to the city filter and auto-zooms to the selection) · monthly trend by year · % days above 24-h limit
 5. **Footnote band** — reading guidance + source note
 
+Every stat card carries a slim brand-colored accent rule across its top; the
+layout uses 1 % margins and gutters for an airy, balanced grid.
+
 All interactivity from the original workbook is preserved (city filter,
-pollutant parameter, year filter, cross-dashboard navigation buttons).
+pollutant parameter, year filter, cross-dashboard navigation buttons), and the
+new locator map responds to the city filter like every other drilldown sheet.
 
 ## Files
 
 | Path | Purpose |
 |---|---|
 | `Air_Pollution_Dashboard.twbx` | The themed Tableau workbook |
-| `theme/palette.json` | Design tokens — the single source of truth |
+| `theme/palette.json` | Design tokens — the single source of truth (v1.1, softer aesthetic) |
 | `theme/apply_theme.py` | Theme builder (worksheet restyle, color pinning, dashboard rebuild, button assets, previews) |
 | `preview/Nationwide_Overview.png` | Design preview rendered from the same layout spec + tokens |
 | `preview/City_Drilldown.png` | Design preview rendered from the same layout spec + tokens |
