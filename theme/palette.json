@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/07/schema#",
+  "name": "Atmos",
+  "version": "1.0.0",
+  "description": "Modular color system for the Air Pollution Dashboard. Every color used anywhere in the workbook is derived from this file. Edit a token here and re-run theme/apply_theme.py to re-skin the entire workbook.",
+
+  "color": {
+    "surface": {
+      "canvas": "#EEF2F7",
+      "card": "#FFFFFF",
+      "header": "#132A43"
+    },
+
+    "ink": {
+      "heading": "#132A43",
+      "body": "#3E5166",
+      "muted": "#6C7F94",
+      "inverse": "#FFFFFF",
+      "inverseMuted": "#A9BDD4"
+    },
+
+    "line": {
+      "hairline": "#D9E2EC",
+      "headerRule": "#2C5375"
+    },
+
+    "brand": {
+      "primary": "#1B6CA8",
+      "primaryDark": "#14507E"
+    },
+
+    "series": {
+      "prior": "#A3B7CB",
+      "current": "#1B6CA8"
+    },
+
+    "status": {
+      "good": "#4E9E70",
+      "moderate": "#E3A93D",
+      "bad": "#CF5A5A"
+    },
+
+    "categorical": {
+      "blue": "#1B6CA8",
+      "amber": "#E3A93D",
+      "green": "#4E9E70",
+      "rose": "#C9605E",
+      "purple": "#7E6DAE",
+      "teal": "#45A0A4",
+      "olive": "#96A054",
+      "brown": "#A9805B"
+    },
+
+    "pollutant": {
+      "pm2_5": "#C9605E",
+      "pm10": "#E3A93D",
+      "co": "#1B6CA8",
+      "no2": "#4E9E70",
+      "o3": "#7E6DAE",
+      "so2": "#45A0A4",
+      "nh3": "#96A054",
+      "no": "#A9805B"
+    },
+
+    "aqiCategory": {
+      "Low AQI": "#4E9E70",
+      "Moderate AQI": "#E3A93D",
+      "High AQI": "#CF5A5A"
+    },
+
+    "exceedanceFlag": {
+      "Normal": "#4E9E70",
+      "High": "#CF5A5A"
+    },
+
+    "year": {
+      "2021": "#A3B7CB",
+      "2022": "#1B6CA8"
+    }
+  },
+
+  "type": {
+    "family": "Tableau",
+    "familyBold": "Tableau Bold",
+    "dashboardTitle": 22,
+    "dashboardSubtitle": 10,
+    "chartTitle": 12,
+    "kpiLabel": 10,
+    "kpiValueNumeric": 26,
+    "kpiValueText": 18,
+    "footnote": 9
+  }
+}
