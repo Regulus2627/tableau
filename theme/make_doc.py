@@ -187,8 +187,8 @@ add_table(doc,
 
 h(doc, "2.  The data", 1)
 p(doc, "Daily ambient air-quality readings published by the CPCB continuous monitoring "
-       "network: 26 Indian cities, January 2021 \u2013 December 2022 (18,980 daily records). "
-       "Each record carries an AQI index (1\u201310 scale; unhealthy \u2265 4) plus concentrations "
+       "network: 26 Indian cities, January 2021 \u2013 December 2022 (18,928 daily records). "
+       "Each record carries an AQI index (1\u20135 scale; unhealthy \u2265 4) plus concentrations "
        "of eight pollutants \u2014 CO, NO, NO\u2082, O\u2083, SO\u2082, PM2.5, PM10 and NH\u2083 \u2014 benchmarked "
        "against Indian NAAQS annual and 24-hour limits.")
 
